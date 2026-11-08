@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Una sorpresa especial para ti</title>
+  <meta name="description" content="Una experiencia interactiva de acertijos y recuerdos.">
+  
+  <!-- Tipografía moderna de Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Canvas para confeti y partículas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Barra flotante superior -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <svg class="svg-icon-gold" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+      <span>Edición Especial</span>
+    </div>
+  </header>
+
+  <main class="app-container">
+
+    <!-- HERO INTRO -->
+    <section class="hero-section">
+      <div class="badge-pill">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+        <span>Misión Cumpleaños</span>
+      </div>
+      <h1 class="hero-title">Un pequeño desafío para alguien especial</h1>
+      <p class="hero-subtitle">Para acceder a tus sorpresas debes demostrar qué tan buena memoria tienes. Resuelve los acertijos a continuación:</p>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- ACERTIJO 1: LA FECHA DE AMISTAD                -->
+    <!-- ============================================== -->
+    <section class="riddle-card" id="riddle-date-card">
+      <div class="card-header">
+        <div class="step-indicator">
+          <span>Paso 01</span>
+        </div>
+        <div class="lock-icon-wrapper">
+          <svg class="svg-lock" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="riddle-question">
+        <svg class="svg-calendar" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <h2>¿Cuándo fue el día en que nos hicimos amigos?</h2>
+      </div>
+      <p class="riddle-hint">Selecciona la fecha exacta para desencriptar tu primer recuerdo:</p>
+
+      <!-- Selector de fecha elegante y responsive -->
+      <div class="date-selector-grid">
+        <div class="select-field">
+          <label for="day-select">Día</label>
+          <div class="select-wrapper">
+            <select id="day-select"></select>
+          </div>
+        </div>
+        <div class="select-field">
+          <label for="month-select">Mes</label>
+          <div class="select-wrapper">
+            <select id="month-select"></select>
+          </div>
+        </div>
+        <div class="select-field">
+          <label for="year-select">Año</label>
+          <div class="select-wrapper">
+            <select id="year-select"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="date-feedback" class="feedback-box" style="display:none;"></div>
+
+      <button id="btn-unlock-date" class="primary-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 2l-2 2m-6 6l7-7m-7 7l-2 2m-2-2l2-2m-2 2l-4 4m0 0l-2-2m2 2l-2 2m-2-2l2-2m-2 2l-2-2m2 2l-3 3a5.5 5.5 0 1 1-7.78-7.78l7.07-7.07"></path>
+        </svg>
+        <span>Desbloquear recuerdo</span>
+      </button>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECCIÓN 2: FOTO DESENCRIPTADA Y MENSAJE        -->
+    <!-- (Aparece cuando acierta la fecha)              -->
+    <!-- ============================================== -->
+    <section class="revealed-section hidden-section" id="section-photo-letter">
+      
+      <div class="photo-card-container">
+        <div class="photo-frame-glow">
+          <div class="photo-frame">
+            <div id="photo-skeleton" class="skeleton-loader">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span>Descifrando imagen privada...</span>
+            </div>
+            <!-- La foto se inyecta dinámicamente descifrada en memoria -->
+            <img id="decrypted-photo-img" alt="Foto especial" style="display:none;">
+
+            <!-- Nota sobre la foto -->
+            <div id="photo-overlay-note" class="photo-overlay-note" style="display:none;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+              </svg>
+              <span><strong>Nota:</strong> que hermosa amiga tengo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="photo-badge">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Recuerdo Desbloqueado</span>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- AQUÍ PUEDES EDITAR EL TEXTO PARA TU AMIGA       -->
+      <!-- ============================================== -->
+      <article class="letter-card">
+        <div class="letter-header">
+          <svg class="svg-sparkle" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3l1.912 5.886a1 1 0 0 0 .95.69h6.188l-5.007 3.638a1 1 0 0 0-.364 1.118l1.912 5.886-5.007-3.638a1 1 0 0 0-1.176 0l-5.007 3.638 1.912-5.886a1 1 0 0 0-.364-1.118L2.95 9.576h6.188a1 1 0 0 0 .95-.69L12 3z"></path>
+          </svg>
+          <span class="letter-label">Dedicatoria para ti</span>
+        </div>
+        <h3 class="letter-title">¡Feliz Cumpleaños, niña hermosa!</h3>
+        <div class="letter-body">
+          <p>
+            <!-- TEXTO EDITABLE: Cambia este párrafo por tus propias palabras cuando quieras -->
+            Hoy no es un dia cualquiera hoy es el cumpleaños de una niña super cool, super hermosa y algo enojona pero eso le da el toque de ser especial, me tome el tiempo de relizar este poryecto ya que me encuentro lejos pero no es excusa para mandar un regalo a esa niña que tanto quiero.
+          </p>
+          <p>
+            <!-- TEXTO EDITABLE: Segundo párrafo -->
+            Desde que nos conocimos, me caiste super bien, ambos somos jodidos y nos entendemos a la perfeccion o eso creo JAJA pero lo unico que se es que tengo a esa amiga que siempre me rio con ella y casi siempre me manda a la mrd jajaja te quiero mucho pasala super cool y sigue cumpliendo mas años.
+          </p>
+        </div>
+        <div class="letter-signature">
+          <span>Con mucho cariño,</span>
+          <strong>Tu gran amigo J</strong>
+        </div>
+      </article>
+
+      <!-- Divisor hacia el siguiente acertijo -->
+      <div class="section-divider">
+        <div class="divider-line"></div>
+        <div class="divider-pill">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+          <span>Siguiente Desafío</span>
+        </div>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- ACERTIJO 2: EL MEJOR JUGADOR (CR7 / BANTER)     -->
+      <!-- ============================================== -->
+      <section class="riddle-card" id="riddle-football-card">
+        <div class="card-header">
+          <div class="step-indicator">
+            <span>Paso 02</span>
+          </div>
+          <div class="lock-icon-wrapper football-theme">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+              <path d="M2 12h20"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="riddle-question">
+          <svg class="svg-trophy" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+            <path d="M4 22h16"></path>
+            <path d="M10 14.66V17c0 .55-.45 1-1 1H7"></path>
+            <path d="M14 14.66V17c0 .55.45 1 1 1h2"></path>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
+          </svg>
+          <h2>Ingresa el nombre del mejor jugador de la historia</h2>
+        </div>
+        <p class="riddle-hint">Piénsalo bien... no te equivoques de bando futbolero:</p>
+
+        <div class="text-input-field">
+          <div class="input-icon-wrapper">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.29l4.86-3.887a.5.5 0 0 1 .795.536L20.6 18.2a2 2 0 0 1-1.987 1.8H5.387a2 2 0 0 1-1.987-1.8L1.44 5.81a.5.5 0 0 1 .795-.536l4.86 3.887a1 1 0 0 0 1.516-.29l2.952-5.604z"></path>
+            </svg>
+          </div>
+          <input type="text" id="input-football" placeholder="Escribe aquí el nombre del GOAT..." autocomplete="off">
+        </div>
+
+        <div id="football-feedback" class="feedback-box" style="display:none;"></div>
+
+        <button id="btn-check-football" class="primary-btn btn-football">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+          <span>Confirmar jugador</span>
+        </button>
+      </section>
+
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECCIÓN 3: LA SORPRESA FINAL                   -->
+    <!-- (Tarjeta interactiva Raspa y Gana)            -->
+    <!-- ============================================== -->
+    <section class="final-surprise-section hidden-section" id="section-final-surprise">
+      
+      <div class="final-header">
+        <div class="crown-badge">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"></polygon>
+          </svg>
+        </div>
+        <h2 class="final-title">¡Última Sorpresa Desbloqueada!</h2>
+        <p class="final-subtitle">Has demostrado tener la mejor memoria (y debatible gusto futbolero). Tu regalo final está protegido bajo esta tarjeta dorada:</p>
+      </div>
+
+      <!-- Tarjeta Raspa y Gana interactiva -->
+      <div class="scratch-outer-card">
+        <div class="scratch-card-wrapper" id="scratch-card-container">
+          
+          <!-- Contenido oculto bajo la capa rascable -->
+          <div class="ticket-reward-content" id="ticket-reward">
+            <div class="ticket-golden-header">
+              <div class="ticket-brand">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"></path>
+                  <path d="M2 7h20v5H2z"></path>
+                  <path d="M12 22V7"></path>
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                </svg>
+                <span>BOLETO DORADO VIP</span>
+              </div>
+              <span class="ticket-status">DESTINO: CHICLAYO</span>
+            </div>
+
+            <h3 class="ticket-title">Pase Oficial de Encuentro en Chiclayo</h3>
+            <p class="ticket-intro">Un compromiso oficial para cuando nos veamos. Este boleto te da derecho a:</p>
+
+            <ul class="ticket-perks">
+              <li>
+                <div class="perk-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </div>
+                <span><strong>El Gran Reencuentro en Chiclayo:</strong> El esperado día de vernos en persona, abrazo gigante y día libre de dramas.</span>
+              </li>
+              <li>
+                <div class="perk-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <span><strong>Salidas a Comer:</strong> Tu restaurante, comida norteña o postre favorito en Chiclayo, todo pagado por mí.</span>
+              </li>
+              <li>
+                <div class="perk-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                </div>
+                <span><strong>Tarde de Cine:</strong> Película que tú elijas con combo completo (canchita grande, dulces y gaseosa incluidos).</span>
+              </li>
+            </ul>
+
+            <!-- Cláusula especial para reclamar o extender -->
+            <div class="ticket-clause-box">
+              <div class="clause-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+              </div>
+              <p><strong>Para reclamar (o extender la vigencia):</strong> Es requisito obligatorio decirle unas palabritas bonitas y de agradecimiento al que desarrolló esta página 😉</p>
+            </div>
+
+            <div class="ticket-footer-info">
+              <span>Caduca: <strong>11 de Noviembre del 2027</strong></span>
+              <span>Lugar: <strong>Chiclayo</strong></span>
+            </div>
+          </div>
+
+          <!-- Canvas que cubre el boleto para raspar -->
+          <canvas id="scratch-canvas"></canvas>
+
+        </div>
+      </div>
+
+      <!-- Acciones finales -->
+      <div class="final-actions">
+        <!-- Reemplaza el número 51999999999 por el número de Jordan si lo deseas -->
+        <a id="btn-claim-whatsapp" 
+           href="https://api.whatsapp.com/send?text=%C2%A1Hola!%20Ya%20complet%C3%A9%20todos%20tus%20acertijos%20(y%20s%C3%AD,%20el%20Bicho%20manda%20%E2%9A%BD).%20Aqu%C3%AD%20van%20mis%20palabritas%20para%20el%20desarrollador%20de%20esta%20p%C3%A1gina:%20[...]%20%C2%A1Ahora%20a%20cumplir%20mi%20Boleto%20para%20Chiclayo!%20%F0%9F%8E%9F%EF%B8%8F%E2%9C%A8" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="whatsapp-btn">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.457h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          <span>Reclamar mi regalo por WhatsApp</span>
+        </a>
+
+        <button id="btn-more-confetti" class="secondary-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+          </svg>
+          <span>¡Lanzar más confeti!</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Footer elegante -->
+    <footer class="app-footer">
+      <p>Hecho con mucho aprecio especialmente para ti</p>
+      <div class="footer-dot"></div>
+      <span>¡Que tengas el mejor de los cumpleaños!</span>
+    </footer>
+
+  </main>
+
+  <!-- Archivo de datos encriptados con AES-256-GCM (La foto no está expuesta en GitHub) -->
+  <script src="js/encrypted-payload.js"></script>
+  <!-- Motores de sonido, raspa y gana y lógica principal -->
+  <script src="js/audio-synth.js"></script>
+  <script src="js/scratch-card.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

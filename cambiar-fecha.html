@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Herramienta Privada: Configurar Fecha y Encriptación</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 30px 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #facc15;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #e2e8f0;
+    }
+    input[type="text"], input[type="date"], select {
+      width: 100%;
+      padding: 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 14px;
+      background: #facc15;
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .btn:hover {
+      background: #eab308;
+    }
+    .output-box {
+      margin-top: 25px;
+      padding: 16px;
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      display: none;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .copy-btn {
+      background: #38bdf8;
+      color: #0f172a;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+    .status-success { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🔒 Panel Privado: Encriptador de Foto</h1>
+  <p>Esta herramienta corre 100% en tu navegador y sirve para cambiar la fecha o re-encriptar la foto sin que nadie en GitHub pueda verla.</p>
+
+  <div class="form-group">
+    <label for="input-date">Ingresa la Fecha Secreta (Día en que se hicieron amigos):</label>
+    <input type="date" id="input-date" value="2023-09-15">
+    <small style="color: #64748b; font-size: 0.8rem; margin-top: 4px; display: block;">Formato: Año - Mes - Día (ej. 2023-09-15)</small>
+  </div>
+
+  <div class="form-group">
+    <label for="input-file">Seleccionar Foto (Opcional, si deseas cambiarla):</label>
+    <input type="file" id="input-file" accept="image/*">
+    <small style="color: #64748b; font-size: 0.8rem; margin-top: 4px; display: block;">Si no seleccionas ninguna, usará la foto ya encriptada actualmente.</small>
+  </div>
+
+  <button id="btn-generate" class="btn">⚡ Generar Nuevo Archivo Encriptado</button>
+
+  <div id="result-box" class="output-box">
+    <div id="status-tag" class="status-badge status-success">¡Encriptado con éxito!</div>
+    <p style="margin-top: 10px; font-size: 0.88rem; color: #cbd5e1;">
+      Descarga el archivo y reemplázalo en tu carpeta <code>js/encrypted-payload.js</code>:
+    </p>
+    <button id="btn-download" class="btn" style="background:#22c55e; color:#fff; margin-bottom: 15px;">💾 Descargar encrypted-payload.js</button>
+  </div>
+</div>
+
+<script src="js/encrypted-payload.js"></script>
+<script>
+  let currentImageArrayBuffer = null;
+
+  // Si ya existe el payload actual, podemos extraer los bytes desencriptándolos o usar una imagen nueva
+  document.getElementById('input-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      currentImageArrayBuffer = await file.arrayBuffer();
+      alert('Foto cargada correctamente para encriptar.');
+    }
+  });
+
+  document.getElementById('btn-generate').addEventListener('click', async () => {
+    const dateVal = document.getElementById('input-date').value.trim();
+    if (!dateVal) {
+      alert('Por favor selecciona una fecha.');
+      return;
+    }
+
+    let bufferToEncrypt = currentImageArrayBuffer;
+
+    if (!bufferToEncrypt) {
+      // Intentar usar la foto ya cargada descifrándola con la fecha anterior (2023-09-15)
+      try {
+        const subtle = window.crypto.subtle;
+        const payload = window.ENCRYPTED_PHOTO_PAYLOAD;
+        const salt = Uint8Array.from(atob(payload.salt), c => c.charCodeAt(0));
+        const iv = Uint8Array.from(atob(payload.iv), c => c.charCodeAt(0));
+        const data = Uint8Array.from(atob(payload.data), c => c.charCodeAt(0));
+
+        // Clave anterior por defecto
+        const keyMat = await subtle.importKey('raw', new TextEncoder().encode('2023-09-15'), { name: 'PBKDF2' }, false, ['deriveKey']);
+        const oldKey = await subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, keyMat, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+        bufferToEncrypt = await subtle.decrypt({ name: 'AES-GCM', iv }, oldKey, data);
+      } catch (err) {
+        alert('Por favor selecciona la foto desde tu computadora con el botón "Seleccionar Foto" para encriptarla con la nueva fecha.');
+        return;
+      }
+    }
+
+    // Encriptar con la nueva fecha
+    const subtle = window.crypto.subtle;
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+    const keyMaterial = await subtle.importKey('raw', new TextEncoder().encode(dateVal), { name: 'PBKDF2' }, false, ['deriveKey']);
+    const newKey = await subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+
+    const encryptedData = await subtle.encrypt({ name: 'AES-GCM', iv }, newKey, bufferToEncrypt);
+
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+
+    const newPayload = {
+      generatedAt: new Date().toISOString(),
+      format: 'image/jpeg',
+      salt: arrayBufferToBase64(salt),
+      iv: arrayBufferToBase64(iv),
+      data: arrayBufferToBase64(encryptedData)
+    };
+
+    const fileContent = `/**
+ * ARCHIVO DE FOTO ENCRIPTADA (AES-256-GCM)
+ * Fecha clave configurada: ${dateVal}
+ */
+window.ENCRYPTED_PHOTO_PAYLOAD = ${JSON.stringify(newPayload, null, 2)};
+`;
+
+    document.getElementById('result-box').style.display = 'block';
+
+    document.getElementById('btn-download').onclick = () => {
+      const blob = new Blob([fileContent], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'encrypted-payload.js';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+  });
+</script>
+
+</body>
+</html>

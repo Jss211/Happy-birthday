@@ -1,8 +1,9 @@
 /**
  * Scratch Card Canvas Engine (Versión Ultra-Rendimiento para Celulares)
- * - Cero lag: Cálculo matricial O(1) sin lectura pesada de getImageData.
- * - Bloqueo total de scroll con PointerCapture (el estándar de juegos web).
- * - Despeje rápido y satisfactorio (2-3 pasadas con el pulgar revelan la sorpresa).
+ * - NUNCA se borra al scrollear (ignora el cambio de barra de navegación del celular).
+ * - Pantalla fija al raspar (bloqueo total de gestos mientras el dedo esté en la tarjeta).
+ * - Trazo directo continuo de 60fps/120fps sin lag.
+ * - Despeje rápido en 2-3 pasadas (umbral optimizado a 25%).
  */
 
 class BirthdayScratchCard {
@@ -13,14 +14,14 @@ class BirthdayScratchCard {
     this.isDrawing = false;
     this.isCompleted = false;
     this.lastPoint = null;
-    this.brushRadius = options.brushRadius || 36;
-    this.threshold = options.threshold || 30; // 30% descubierto para activar (2-3 pasadas)
+    this.brushRadius = options.brushRadius || 38;
+    this.threshold = options.threshold || 25; // 25% para que con 2-3 pasadas se abra
     this.onComplete = options.onComplete || (() => {});
     this.onScratch = options.onScratch || (() => {});
 
-    // Matriz de celdas virtuales (20x25 = 500 celdas) para porcentaje instantáneo O(1)
-    this.cols = 20;
-    this.rows = 25;
+    // Matriz virtual ligera (18x24 = 432 celdas) para calcular porcentaje en microsegundos
+    this.cols = 18;
+    this.rows = 24;
     this.totalCells = this.cols * this.rows;
     this.grid = new Uint8Array(this.totalCells);
     this.clearedCells = 0;
@@ -42,7 +43,6 @@ class BirthdayScratchCard {
     this.width = Math.max(280, Math.floor(rect.width));
     this.height = Math.max(420, Math.floor(rect.height));
     
-    // DPR de 1.0 para el lienzo de raspado: máximo rendimiento sin sobrecargar la GPU del celular
     this.canvas.width = this.width;
     this.canvas.height = this.height;
 
@@ -69,14 +69,13 @@ class BirthdayScratchCard {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Chispas decorativas
+    // Chispas decorativas sutiles
     ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-    for (let i = 0; i < 70; i++) {
+    for (let i = 0; i < 50; i++) {
       const x = Math.random() * w;
       const y = Math.random() * h;
-      const r = Math.random() * 2;
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.arc(x, y, 1.5, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -102,18 +101,28 @@ class BirthdayScratchCard {
   bindEvents() {
     const c = this.canvas;
 
+    const lockScreen = () => {
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.touchAction = 'none';
+    };
+
+    const unlockScreen = () => {
+      document.body.style.touchAction = '';
+      document.documentElement.style.touchAction = '';
+    };
+
     const onPointerDown = (e) => {
       if (this.isCompleted) return;
       if (e.cancelable) e.preventDefault();
+      lockScreen();
       
-      // Capturar puntero para que el navegador NUNCA mueva ni desplace la página
       try {
         c.setPointerCapture(e.pointerId);
       } catch (err) {}
 
       this.isDrawing = true;
       this.lastPoint = this.getPos(e);
-      this.scratchAt(this.lastPoint.x, this.lastPoint.y);
+      this.scratchPoint(this.lastPoint.x, this.lastPoint.y);
       this.triggerAudio(0);
     };
 
@@ -126,23 +135,19 @@ class BirthdayScratchCard {
       const dy = pos.y - this.lastPoint.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Interpolación suave para cubrir el trazo sin dejar huecos
-      const steps = Math.max(1, Math.ceil(dist / (this.brushRadius * 0.5)));
-      for (let i = 1; i <= steps; i++) {
-        const ix = this.lastPoint.x + (dx * (i / steps));
-        const iy = this.lastPoint.y + (dy * (i / steps));
-        this.scratchAt(ix, iy);
+      if (dist >= 2) {
+        this.scratchStroke(this.lastPoint.x, this.lastPoint.y, pos.x, pos.y);
+        this.lastPoint = pos;
+        this.triggerAudio(dist);
+        this.checkProgress();
       }
-
-      this.lastPoint = pos;
-      this.triggerAudio(dist);
-      this.checkProgress();
     };
 
     const onPointerUp = (e) => {
+      unlockScreen();
       if (e && e.cancelable) e.preventDefault();
       try {
-        if (e.pointerId && c.hasPointerCapture(e.pointerId)) {
+        if (e && e.pointerId && c.hasPointerCapture(e.pointerId)) {
           c.releasePointerCapture(e.pointerId);
         }
       } catch (err) {}
@@ -150,19 +155,24 @@ class BirthdayScratchCard {
       this.lastPoint = null;
     };
 
-    // Usar Pointer Events (soporte universal moderno en Android e iOS)
+    // Usar Pointer Events (soporte unificado en Android e iOS)
     c.addEventListener('pointerdown', onPointerDown, { passive: false });
     c.addEventListener('pointermove', onPointerMove, { passive: false });
     c.addEventListener('pointerup', onPointerUp, { passive: false });
     c.addEventListener('pointercancel', onPointerUp, { passive: false });
 
-    // Fallback táctil adicional con bloqueo de scroll
+    // Fallback táctil adicional
     c.addEventListener('touchstart', onPointerDown, { passive: false });
     c.addEventListener('touchmove', onPointerMove, { passive: false });
     c.addEventListener('touchend', onPointerUp, { passive: false });
 
+    // IMPORTANTE: NUNCA redibujar la lámina al hacer scroll vertical
+    // Solo redibujar si el usuario gira físicamente el celular (ancho cambia más de 60px)
+    let initialWidth = window.innerWidth;
     window.addEventListener('resize', () => {
-      if (!this.isCompleted) {
+      const newWidth = window.innerWidth;
+      if (Math.abs(newWidth - initialWidth) > 60 && !this.isCompleted) {
+        initialWidth = newWidth;
         this.resize();
         this.drawCover();
       }
@@ -179,16 +189,33 @@ class BirthdayScratchCard {
     };
   }
 
-  scratchAt(x, y) {
+  scratchPoint(x, y) {
     const ctx = this.ctx;
-    ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
     ctx.arc(x, y, this.brushRadius, 0, Math.PI * 2);
     ctx.fill();
-    ctx.restore();
+    this.markGridPoint(x, y);
+  }
 
-    // Actualizar celdas de la matriz virtual O(1)
+  scratchStroke(x1, y1, x2, y2) {
+    const ctx = this.ctx;
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineWidth = this.brushRadius * 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    this.markGridPoint(x2, y2);
+    const midX = (x1 + x2) * 0.5;
+    const midY = (y1 + y2) * 0.5;
+    this.markGridPoint(midX, midY);
+  }
+
+  markGridPoint(x, y) {
     const r = this.brushRadius;
     const minCol = Math.max(0, Math.floor((x - r) / this.cellW));
     const maxCol = Math.min(this.cols - 1, Math.floor((x + r) / this.cellW));
@@ -198,13 +225,11 @@ class BirthdayScratchCard {
 
     for (let row = minRow; row <= maxRow; row++) {
       const cy = (row + 0.5) * this.cellH;
-      const dy = cy - y;
-      const dy2 = dy * dy;
+      const dy2 = (cy - y) * (cy - y);
 
       for (let col = minCol; col <= maxCol; col++) {
         const cx = (col + 0.5) * this.cellW;
-        const dx = cx - x;
-        if (dx * dx + dy2 <= r2) {
+        if ((cx - x) * (cx - x) + dy2 <= r2) {
           const idx = row * this.cols + col;
           if (this.grid[idx] === 0) {
             this.grid[idx] = 1;
@@ -217,7 +242,7 @@ class BirthdayScratchCard {
 
   triggerAudio(dist) {
     this.lastAudioDist += dist;
-    if (this.lastAudioDist >= 22) {
+    if (this.lastAudioDist >= 26) {
       this.lastAudioDist = 0;
       this.onScratch();
     }

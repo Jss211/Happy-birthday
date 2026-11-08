@@ -429,8 +429,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setTimeout(() => {
-      sectionFinal.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 400);
+      sectionFinal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 350);
   }
 
   // Botón alternativo para abrir el boleto al instante

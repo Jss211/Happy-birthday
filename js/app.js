@@ -33,8 +33,14 @@ class ParticleSystem {
     this.ctx = this.canvas.getContext('2d');
     this.particles = [];
     this.animId = null;
+    this.lastWidth = window.innerWidth;
     this.resize();
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('resize', () => {
+      if (Math.abs(window.innerWidth - this.lastWidth) > 50) {
+        this.lastWidth = window.innerWidth;
+        this.resize();
+      }
+    });
   }
 
   resize() {
@@ -42,26 +48,25 @@ class ParticleSystem {
     this.canvas.height = window.innerHeight;
   }
 
-  burst(x = window.innerWidth / 2, y = window.innerHeight / 2, count = 70) {
-    const colors = ['#f43f5e', '#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#fbbf24', '#ffffff'];
-    const shapes = ['rect', 'circle', 'star'];
+  burst(x = window.innerWidth / 2, y = window.innerHeight / 2, count = 32) {
+    const colors = ['#f43f5e', '#ec4899', '#d4af37', '#fef08a', '#3b82f6', '#10b981'];
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 4 + Math.random() * 9;
+      const speed = 3 + Math.random() * 6;
       this.particles.push({
         x: x,
         y: y,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - (Math.random() * 4),
-        gravity: 0.18 + Math.random() * 0.1,
+        vy: Math.sin(angle) * speed - (Math.random() * 3),
+        gravity: 0.22,
         rotation: Math.random() * Math.PI * 2,
-        vRot: (Math.random() - 0.5) * 0.2,
-        size: 5 + Math.random() * 6,
+        vRot: (Math.random() - 0.5) * 0.15,
+        size: 5 + Math.random() * 4,
         color: colors[Math.floor(Math.random() * colors.length)],
-        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        shape: Math.random() > 0.5 ? 'rect' : 'circle',
         alpha: 1,
-        decay: 0.008 + Math.random() * 0.008
+        decay: 0.018 + Math.random() * 0.012
       });
     }
 
@@ -82,7 +87,7 @@ class ParticleSystem {
       p.rotation += p.vRot;
       p.alpha -= p.decay;
 
-      if (p.alpha <= 0 || p.y > this.canvas.height + 50) {
+      if (p.alpha <= 0 || p.y > this.canvas.height + 30) {
         this.particles.splice(i, 1);
         continue;
       }
@@ -95,12 +100,10 @@ class ParticleSystem {
 
       if (p.shape === 'rect') {
         ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
-      } else if (p.shape === 'circle') {
+      } else {
         ctx.beginPath();
         ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
         ctx.fill();
-      } else if (p.shape === 'star') {
-        this.drawStar(ctx, 0, 0, 5, p.size / 2, p.size / 4);
       }
 
       ctx.restore();
@@ -111,30 +114,6 @@ class ParticleSystem {
     } else {
       this.animId = null;
     }
-  }
-
-  drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
-    let rot = Math.PI / 2 * 3;
-    let x = cx;
-    let y = cy;
-    const step = Math.PI / spikes;
-
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - outerRadius);
-    for (let i = 0; i < spikes; i++) {
-      x = cx + Math.cos(rot) * outerRadius;
-      y = cy + Math.sin(rot) * outerRadius;
-      ctx.lineTo(x, y);
-      rot += step;
-
-      x = cx + Math.cos(rot) * innerRadius;
-      y = cy + Math.sin(rot) * innerRadius;
-      ctx.lineTo(x, y);
-      rot += step;
-    }
-    ctx.lineTo(cx, cy - outerRadius);
-    ctx.closePath();
-    ctx.fill();
   }
 }
 
@@ -428,9 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ticketReward.style.display = 'flex';
       envelopeBox.style.display = 'none';
       window.birthdayAudio.playCelebration();
-      particleSys.burst(window.innerWidth / 2, window.innerHeight * 0.45, 90);
+      particleSys.burst(window.innerWidth / 2, window.innerHeight * 0.45, 30);
       ticketReward.classList.add('ticket-revealed');
-    }, 450);
+    }, 400);
   }
 
   if (waxSeal) {
@@ -454,8 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnMoreConfetti.addEventListener('click', () => {
       window.birthdayAudio.playClick();
       window.birthdayAudio.playCelebration();
-      particleSys.burst(window.innerWidth * 0.3, window.innerHeight * 0.5, 50);
-      particleSys.burst(window.innerWidth * 0.7, window.innerHeight * 0.5, 50);
+      particleSys.burst(window.innerWidth * 0.5, window.innerHeight * 0.4, 25);
     });
   }
 });

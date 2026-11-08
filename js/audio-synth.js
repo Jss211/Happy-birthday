@@ -205,37 +205,28 @@ class BirthdayAudioEngine {
     source.stop(t + duration + 0.01);
   }
 
-  // Explosión festiva de confeti
+  // Fanfarria festiva optimizada (arpegio brillante y ligero)
   playCelebration() {
     if (this.isMuted) return;
     this.init();
     if (!this.ctx) return;
 
-    const chords = [
-      [523.25, 659.25, 783.99], // Do mayor
-      [587.33, 739.99, 880.00], // Re mayor
-      [659.25, 830.61, 987.77], // Mi mayor
-      [783.99, 987.77, 1174.66] // Sol mayor
-    ];
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // Do, Mi, Sol, Do agudo
+    const t = this.ctx.currentTime;
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const startTime = t + (idx * 0.08);
 
-    let t = this.ctx.currentTime;
-    chords.forEach((chord, i) => {
-      chord.forEach(freq => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(0.12, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
 
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, t + (i * 0.12));
-
-        gain.gain.setValueAtTime(0.12, t + (i * 0.12));
-        gain.gain.exponentialRampToValueAtTime(0.001, t + (i * 0.12) + 0.5);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start(t + (i * 0.12));
-        osc.stop(t + (i * 0.12) + 0.55);
-      });
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.38);
     });
   }
 }

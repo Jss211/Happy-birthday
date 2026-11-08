@@ -852,7 +852,7 @@ body {
   color: var(--accent-gold);
 }
 
-/* Contenido del Boleto Dorado */
+/* Contenido del Boleto Dorado (Acelerado por GPU, 0% CPU Lag) */
 .ticket-reward-content {
   position: relative;
   width: 100%;
@@ -860,26 +860,24 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: linear-gradient(145deg, #181d2e 0%, #0f1320 100%);
+  background: #141828;
   border: 1px dashed rgba(212, 175, 55, 0.45);
   border-radius: var(--radius-xl);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), var(--shadow-glow);
-  animation: ticketSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 175, 55, 0.25);
+  contain: paint layout;
+  transform: translateZ(0);
+  animation: ticketSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes ticketSlideUp {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.96);
+    transform: translateY(24px) scale(0.97);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}
-
-.ticket-revealed {
-  animation: pulseTicket 1.5s ease-in-out infinite alternate;
 }
 
 .ticket-golden-header {

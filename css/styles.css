@@ -877,11 +877,6 @@ body {
     transform: translateY(0) scale(1);
   }
 }
-  gap: 16px;
-  background: linear-gradient(145deg, #181d2e 0%, #0f1320 100%);
-  border: 1px dashed rgba(212, 175, 55, 0.4);
-  border-radius: var(--radius-lg);
-}
 
 .ticket-revealed {
   animation: pulseTicket 1.5s ease-in-out infinite alternate;

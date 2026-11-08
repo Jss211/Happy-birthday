@@ -216,13 +216,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const footballFeedback = document.getElementById('football-feedback');
   const riddleFootballCard = document.getElementById('riddle-football-card');
 
-  // Elementos DOM - Sección 3 (Sorpresa Final)
+  // Elementos DOM - Sección 3 (Sorpresa Final - Sobre Real)
   const sectionFinal = document.getElementById('section-final-surprise');
-  const scratchContainer = document.getElementById('scratch-card-container');
   const ticketReward = document.getElementById('ticket-reward');
   const btnMoreConfetti = document.getElementById('btn-more-confetti');
-  const btnAudioToggle = document.getElementById('btn-audio-toggle');
-  const btnMelodyToggle = document.getElementById('btn-melody-toggle');
 
   // Popular selectores de fecha
   populateDateSelectors(daySelect, monthSelect, yearSelect);
@@ -230,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Estado global
   let isDateSolved = false;
   let isFootballSolved = false;
-  let scratchCardInstance = null;
 
   // ------------------------------------------
   // LÓGICA ACERTIJO 1: LA FECHA DE AMISTAD
@@ -400,48 +396,57 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ------------------------------------------
-  // LÓGICA SECCIÓN 3: LA SORPRESA FINAL
+  // LÓGICA SECCIÓN 3: LA SORPRESA FINAL (SOBRE REAL DE GALA)
   // ------------------------------------------
-  const btnRevealNow = document.getElementById('btn-reveal-now');
+  const envelopeBox = document.getElementById('envelope-box');
+  const waxSeal = document.getElementById('wax-seal');
+  const envelopeOuter = document.getElementById('envelope-outer');
+  const envelopeHint = document.getElementById('envelope-hint');
+  let isEnvelopeOpened = false;
+
+  function openEnvelope() {
+    if (isEnvelopeOpened) return;
+    isEnvelopeOpened = true;
+
+    // Sonido de desbloqueo y fanfarria
+    window.birthdayAudio.playUnlock();
+
+    // Activar animación 3D de apertura en el sobre
+    envelopeOuter.classList.add('envelope-opened');
+
+    if (envelopeHint) {
+      envelopeHint.innerHTML = `
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>¡Invitación y Boleto Dorado Revelados!</span>
+      `;
+    }
+
+    // Desplegar el Boleto Dorado VIP de adentro del sobre
+    setTimeout(() => {
+      ticketReward.style.display = 'flex';
+      envelopeBox.style.display = 'none';
+      window.birthdayAudio.playCelebration();
+      particleSys.burst(window.innerWidth / 2, window.innerHeight * 0.45, 90);
+      ticketReward.classList.add('ticket-revealed');
+    }, 450);
+  }
+
+  if (waxSeal) {
+    waxSeal.addEventListener('click', openEnvelope);
+  }
+  if (envelopeBox) {
+    envelopeBox.addEventListener('click', openEnvelope);
+  }
 
   function unlockFinalSurprise() {
     sectionFinal.classList.remove('hidden-section');
     sectionFinal.classList.add('visible-section');
 
-    // Inicializar tarjeta raspa y gana si no está creada
-    if (!scratchCardInstance) {
-      setTimeout(() => {
-        scratchCardInstance = new BirthdayScratchCard('scratch-canvas', {
-          brushRadius: 36,
-          threshold: 30, // Solo 30% para que con 2-3 pasadas con el pulgar se descubra rápido
-          onScratch: () => {
-            window.birthdayAudio.playScratch();
-          },
-          onComplete: () => {
-            // Cuando termina de raspar o se abre al instante
-            window.birthdayAudio.playCelebration();
-            particleSys.burst(window.innerWidth / 2, window.innerHeight * 0.5, 90);
-            ticketReward.classList.add('ticket-revealed');
-            if (btnRevealNow) btnRevealNow.style.display = 'none';
-          }
-        });
-      }, 300);
-    }
-
     setTimeout(() => {
       sectionFinal.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 350);
-  }
-
-  // Botón alternativo para abrir el boleto al instante
-  if (btnRevealNow) {
-    btnRevealNow.addEventListener('click', () => {
-      window.birthdayAudio.playClick();
-      if (scratchCardInstance) {
-        scratchCardInstance.revealAll();
-      }
-      btnRevealNow.style.display = 'none';
-    });
   }
 
   // Botón para lanzar más confeti

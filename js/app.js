@@ -402,6 +402,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------------------
   // LÓGICA SECCIÓN 3: LA SORPRESA FINAL
   // ------------------------------------------
+  const btnRevealNow = document.getElementById('btn-reveal-now');
+
   function unlockFinalSurprise() {
     sectionFinal.classList.remove('hidden-section');
     sectionFinal.classList.add('visible-section');
@@ -410,24 +412,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!scratchCardInstance) {
       setTimeout(() => {
         scratchCardInstance = new BirthdayScratchCard('scratch-canvas', {
-          brushRadius: 28,
-          threshold: 40,
+          brushRadius: 36,
+          threshold: 30, // Solo 30% para que con 2-3 pasadas con el pulgar se descubra rápido
           onScratch: () => {
             window.birthdayAudio.playScratch();
           },
           onComplete: () => {
-            // Cuando termina de raspar
+            // Cuando termina de raspar o se abre al instante
             window.birthdayAudio.playCelebration();
             particleSys.burst(window.innerWidth / 2, window.innerHeight * 0.5, 90);
             ticketReward.classList.add('ticket-revealed');
+            if (btnRevealNow) btnRevealNow.style.display = 'none';
           }
         });
-      }, 500);
+      }, 300);
     }
 
     setTimeout(() => {
       sectionFinal.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 500);
+    }, 400);
+  }
+
+  // Botón alternativo para abrir el boleto al instante
+  if (btnRevealNow) {
+    btnRevealNow.addEventListener('click', () => {
+      window.birthdayAudio.playClick();
+      if (scratchCardInstance) {
+        scratchCardInstance.revealAll();
+      }
+      btnRevealNow.style.display = 'none';
+    });
   }
 
   // Botón para lanzar más confeti

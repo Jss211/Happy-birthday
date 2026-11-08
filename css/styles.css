@@ -668,15 +668,14 @@ body {
   line-height: 1.5;
 }
 
-/* Tarjeta Raspa y Gana */
+/* Tarjeta Raspa y Gana (Optimizado sin filtros pesados para 60fps en celular) */
 .scratch-outer-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: #141724;
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: var(--radius-xl);
   padding: 16px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), var(--shadow-glow);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), var(--shadow-glow);
+  contain: paint;
 }
 
 .scratch-card-wrapper {
@@ -691,6 +690,7 @@ body {
   user-select: none !important;
   -webkit-user-select: none !important;
   -webkit-touch-callout: none !important;
+  contain: paint layout;
 }
 
 #scratch-canvas {
@@ -706,6 +706,32 @@ body {
   -webkit-user-select: none !important;
   -webkit-touch-callout: none !important;
   overscroll-behavior: none !important;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Botón alternativo para abrir de inmediato */
+.reveal-shortcut-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 12px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px dashed rgba(212, 175, 55, 0.35);
+  border-radius: var(--radius-md);
+  color: var(--accent-gold-light);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reveal-shortcut-btn:hover, .reveal-shortcut-btn:active {
+  background: rgba(212, 175, 55, 0.18);
+  border-color: var(--accent-gold);
 }
 
 /* Contenido del Boleto Dorado bajo la capa rascable */
